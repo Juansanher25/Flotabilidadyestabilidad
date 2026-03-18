@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Curso de Mecánica de Fluidos: Flotabilidad y Estabilidad</title>
+    
+    <!-- Tailwind CSS para los estilos (Verde, Blanco, Negro) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Configuración de MathJax para renderizar ecuaciones LaTeX impecables -->
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <!-- FontAwesome para los íconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* Paleta de colores estricta: Verde, Blanco, Negro */
+        body {
+            background-color: #ffffff;
+            color: #000000;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+        .bg-primary { background-color: #166534; } /* Verde oscuro institucional */
+        .text-primary { color: #166534; }
+        .bg-secondary { background-color: #f0fdf4; } /* Verde muy claro para fondos */
+        .border-primary { border-color: #166534; }
+        
+        /* Transiciones de la barra lateral */
+        #sidebar {
+            transition: transform 0.3s ease-in-out;
+        }
+        .section-content {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+        .section-content.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        canvas {
+            border: 2px solid #166534;
+            border-radius: 8px;
+            background-color: #e2e8f0;
+            width: 100%;
+            max-width: 500px;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+        
+        .input-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 0.25rem;
+            color: #166534;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #15803d;
+            border-radius: 0.25rem;
+            color: #000;
+        }
+
+        /* Imágenes de reemplazo responsivas */
+        .image-placeholder {
+            width: 100%;
+            height: 200px;
+            background-color: #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed #166534;
+            border-radius: 0.5rem;
+            color: #166534;
+            font-weight: bold;
+            text-align: center;
+            padding: 1rem;
+        }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden text-black">
+
+    <!-- Barra de menú lateral -->
+    <aside id="sidebar" class="bg-primary text-white w-64 flex-shrink-0 absolute inset-y-0 left-0 transform -translate-x-full md:relative md:translate-x-0 z-20">
+        <div class="p-6 flex justify-between items-center">
+            <h2 class="text-2xl font-bold">Menú</h2>
+            <button onclick="toggleSidebar()" class="md:hidden text-white focus:outline-none">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+        <nav class="mt-4">
+            <button onclick="goToSection(0)" class="nav-btn w-full text-left px-6 py-3 hover:bg-green-800 focus:bg-green-800 flex items-center gap-3">
+                <i class="fas fa-home"></i> Portada
+            </button>
+            <button onclick="goToSection(1)" class="nav-btn w-full text-left px-6 py-3 hover:bg-green-800 focus:bg-green-800 flex items-center gap-3">
+                <i class="fas fa-water"></i> 1. Flotabilidad
+            </button>
+            <button onclick="goToSection(2)" class="nav-btn w-full text-left px-6 py-3 hover:bg-green-800 focus:bg-green-800 flex items-center gap-3">
+                <i class="fas fa-ship"></i> 2. Estabilidad
+            </button>
+            <button onclick="goToSection(3)" class="nav-btn w-full text-left px-6 py-3 hover:bg-green-800 focus:bg-green-800 flex items-center gap-3">
+                <i class="fas fa-industry"></i> 3. Aplicaciones
+            </button>
+            <button onclick="goToSection(4)" class="nav-btn w-full text-left px-6 py-3 hover:bg-green-800 focus:bg-green-800 flex items-center gap-3">
+                <i class="fas fa-tasks"></i> 4. Resumen y Videos
+            </button>
+            <button onclick="goToSection(5)" class="nav-btn w-full text-left px-6 py-3 hover:bg-green-800 focus:bg-green-800 flex items-center gap-3">
+                <i class="fas fa-book"></i> 5. Bibliografía
+            </button>
+        </nav>
+    </aside>
+
+    <!-- Contenido Principal -->
+    <main class="flex-1 flex flex-col h-screen relative overflow-hidden bg-white">
+        
+        <!-- Header Móvil -->
+        <header class="bg-primary text-white p-4 flex justify-between items-center md:hidden z-10">
+            <h1 class="font-bold text-lg truncate">Mecánica de Fluidos</h1>
+            <button onclick="toggleSidebar()" class="focus:outline-none">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+        </header>
+
+        <!-- Área de las secciones (Scrollable) -->
+        <div id="content-area" class="flex-1 overflow-y-auto p-6 md:p-12 pb-24">
+            
+            <!-- SECCIÓN 0: PORTADA -->
+            <section id="sec-0" class="section-content active">
+                <div class="max-w-3xl mx-auto text-center mt-10 space-y-8">
+                    <div class="bg-secondary border-t-8 border-primary rounded-lg shadow-lg p-10">
+                        <i class="fas fa-graduation-cap text-6xl text-primary mb-6"></i>
+                        <h1 class="text-4xl md:text-5xl font-extrabold text-primary mb-4">Curso de Mecánica de Fluidos</h1>
+                        <h2 class="text-2xl font-semibold mb-2 text-black">Módulo: Flotabilidad y Estabilidad</h2>
+                        <div class="w-24 h-1 bg-primary mx-auto my-6"></div>
+                        <p class="text-xl font-medium text-black">Profesor: Ph.D. Juan Sandoval Herrera</p>
+                        <p class="text-lg text-black mt-2">Universidad de América</p>
+                        <p class="text-md text-gray-700 mt-1 font-bold">2026</p>
+                    </div>
+                    
+                    <div class="text-left bg-white p-6 rounded-lg shadow-md border border-gray-200">
+                        <h3 class="text-2xl font-bold text-primary mb-3">Bienvenido al módulo interactivo</h3>
+                        <p class="text-lg leading-relaxed text-black">
+                            Este espacio ha sido diseñado meticulosamente para que comprendas de manera visual y analítica cómo interactúan los cuerpos sólidos al ser sumergidos en fluidos. A través de explicaciones claras, ecuaciones matemáticas rigurosas y simuladores interactivos, dominarás los conceptos que dictan por qué un objeto flota, se hunde o se mantiene estable en el agua.
+                        </p>
+                        <p class="text-lg mt-4 text-black font-semibold">¡Comencemos nuestro viaje de aprendizaje!</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECCIÓN 1: FLOTABILIDAD -->
+            <section id="sec-1" class="section-content">
+                <div class="max-w-4xl mx-auto space-y-6">
+                    <h2 class="text-3xl font-bold text-primary border-b-2 border-primary pb-2">1. Flotabilidad de cuerpos sumergidos y flotantes</h2>
+                    
+                    <!-- Cuadro Histórico: Arquímedes -->
+                    <div class="bg-yellow-50 border-l-4 border-yellow-500 p-6 rounded-r-lg shadow-sm mb-8">
+                        <h3 class="text-xl font-bold text-yellow-700 mb-2 flex items-center gap-2">
+                            <i class="fas fa-lightbulb"></i> Un poco de historia: ¡Eureka!
+                        </h3>
+                        <p class="text-lg text-black mb-3">
+                            En el siglo III a.C., el rey Hierón II de Siracusa le pidió al brillante matemático <strong>Arquímedes</strong> que determinara si su nueva corona estaba hecha de oro puro o si el orfebre lo había engañado mezclando plata, sin dañar la corona. 
+                        </p>
+                        <p class="text-lg text-black mb-3">
+                            La leyenda cuenta que mientras tomaba un baño, Arquímedes notó cómo el nivel del agua subía al entrar él en la tina. Se dio cuenta de que el volumen de agua desplazada era igual al volumen de la parte de su cuerpo sumergida. Emocionado por haber encontrado la solución para medir el volumen de objetos irregulares (como la corona), salió corriendo desnudo por las calles gritando <em>"¡Eureka!"</em> (¡Lo he encontrado!).
+                        </p>
+                        <p class="text-lg text-black font-semibold">
+                            Importancia: Este fue el origen de la formulación de su principio. Sentó las bases de la hidrostática, permitiendo hasta el día de hoy el diseño de barcos, submarinos y el análisis de densidades en la ingeniería moderna.
+                        </p>
+                    </div>
+
+                    <p class="text-lg text-black">
+                        Basados en esta historia, definimos la flotabilidad como la tendencia de un fluido a ejercer una fuerza que da apoyo a un cuerpo que está sobre o dentro de él. El principio fundamental establece que:
+                    </p>
+                    <blockquote class="bg-secondary border-l-4 border-primary p-4 italic text-lg text-black">
+                        "Cualquier objeto, total o parcialmente sumergido en un fluido, experimenta una fuerza de empuje hacia arriba (flotación) igual al peso del volumen del fluido que desplaza."
+                    </blockquote>
+
+                    <h3 class="text-2xl font-bold text-primary mt-8">Ecuación Fundamental</h3>
+                    <p class="text-lg text-black">
+                        La magnitud de la fuerza de flotación ($F_B$) se calcula mediante la siguiente ecuación:
+                    </p>
+                    <div class="bg-gray-50 p-4 rounded-lg text-center overflow-x-auto">
+                        $$F_B = \gamma_f \cdot V_d$$
+                    </div>
+                    <ul class="list-disc list-inside text-lg text-black space-y-2 mt-2">
+                        <li>$F_B$: Fuerza de flotación (N o kN).</li>
+                        <li>$\gamma_f$: Peso específico del fluido ($N/m^3$ o $kN/m^3$).</li>
+                        <li>$V_d$: Volumen de fluido desplazado por el cuerpo ($m^3$).</li>
+                    </ul>
+
+                    <!-- Tabla de Condiciones de Flotabilidad -->
+                    <h3 class="text-2xl font-bold text-primary mt-8">Condiciones de Flotabilidad</h3>
+                    <p class="text-lg text-black mb-4">
+                        Dependiendo de la relación entre el peso del cuerpo sólido ($W$) y la fuerza de flotación máxima posible ($F_B$), el cuerpo experimentará uno de tres estados diferentes. Además, la relación entre el volumen desplazado ($V_d$) y el volumen total del cuerpo ($V_c$) cambiará:
+                    </p>
+                    <div class="overflow-x-auto shadow-md rounded-lg">
+                        <table class="min-w-full bg-white border border-gray-300">
+                            <thead class="bg-primary text-white">
+                                <tr>
+                                    <th class="py-3 px-4 text-left border-b border-gray-300">Relación de Fuerzas</th>
+                                    <th class="py-3 px-4 text-left border-b border-gray-300">Estado del Cuerpo</th>
+                                    <th class="py-3 px-4 text-left border-b border-gray-300">Relación de Volúmenes</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-lg">
+                                <tr class="border-b border-gray-200 hover:bg-gray-50">
+                                    <td class="py-3 px-4"><strong>(a)</strong> $W > F_B$</td>
+                                    <td class="py-3 px-4 text-red-700 font-semibold">Se hunde</td>
+                                    <td class="py-3 px-4 font-mono bg-gray-100">$V_d = V_c$</td>
+                                </tr>
+                                <tr class="border-b border-gray-200 hover:bg-gray-50">
+                                    <td class="py-3 px-4"><strong>(b)</strong> $W < F_B$</td>
+                                    <td class="py-3 px-4 text-green-700 font-semibold">Flota (sale a la superficie)</td>
+                                    <td class="py-3 px-4 font-mono bg-gray-100">$V_d < V_c$</td>
+                                </tr>
+                                <tr class="border-b border-gray-200 hover:bg-gray-50">
+                                    <td class="py-3 px-4"><strong>(c)</strong> $W = F_B$</td>
+                                    <td class="py-3 px-4 text-yellow-700 font-semibold">Queda suspendido (neutro)</td>
+                                    <td class="py-3 px-4 font-mono bg-gray-100">$V_d = V_c$</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Simulador 1 -->
+                    <div class="bg-secondary p-6 rounded-lg shadow-md border border-primary mt-8">
+                        <h3 class="text-2xl font-bold text-primary mb-4"><i class="fas fa-desktop"></i> Simulador de Flotabilidad</h3>
+                        <p class="text-md mb-4 text-black">Modifica las dimensiones del bloque rectangular y los pesos específicos para observar su posición relativa en el fluido.</p>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div class="space-y-4">
+                                <div class="input-group">
+                                    <label>Peso específico del fluido, $\gamma_f$ ($kN/m^3$):</label>
+                                    <input type="number" id="sim1-gammaF" value="9.81" step="0.1" oninput="updateSim1()">
+                                    <small class="text-gray-600">Agua dulce $\approx 9.81$, Agua de mar $\approx 10.05$</small>
+                                </div>
+                                <div class="input-group">
+                                    <label>Peso específico del sólido, $\gamma_s$ ($kN/m^3$):</label>
+                                    <input type="number" id="sim1-gammaS" value="6.50" step="0.1" oninput="updateSim1()">
+                                    <small class="text-gray-600">Madera $\approx 6.0$, Concreto $\approx 23.6$</small>
+                                </div>
+                                <div class="grid grid-cols-3 gap-2">
+                                    <div class="input-group">
+                                        <label>Ancho (m):</label>
+                                        <input type="number" id="sim1-w" value="2.0" step="0.1" oninput="updateSim1()">
+                                    </div>
+                                    <div class="input-group">
+                                        <label>Alto, $H$ (m):</label>
+                                        <input type="number" id="sim1-h" value="1.5" step="0.1" oninput="updateSim1()">
+                                    </div>
+                                    <div class="input-group">
+                                        <label>Prof. (m):</label>
+                                        <input type="number" id="sim1-d" value="2.0" step="0.1" oninput="updateSim1()">
+                                    </div>
+                                </div>
+                                <div class="mt-4 p-4 bg-white border border-gray-300 rounded">
+                                    <p class="font-bold text-black">Estado: <span id="sim1-status" class="text-primary"></span></p>
+                                    <p class="text-black">Calado (parte sumergida), $Y$: <span id="sim1-draft" class="font-bold"></span> m</p>
+                                </div>
+                            </div>
+                            <div class="flex justify-center items-center">
+                                <canvas id="canvasSim1" width="300" height="300"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ejemplo 1 -->
+                    <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-primary mt-8">
+                        <h3 class="text-xl font-bold text-primary mb-2">Ejemplo Práctico 1</h3>
+                        <p class="text-lg text-black font-semibold">Problema:</p>
+                        <p class="text-lg text-black mb-4">Un bloque de concreto sólido tiene un volumen de $0.5 \ m^3$ y un peso específico de $23.6 \ kN/m^3$. Si se sumerge completamente en agua dulce ($\gamma_f = 9.81 \ kN/m^3$), determine la fuerza neta (aparente) que ejerce el bloque si estuviera suspendido de un cable.</p>
+                        
+                        <p class="text-lg text-black font-semibold">Solución paso a paso:</p>
+                        <ol class="list-decimal list-inside text-lg text-black space-y-2">
+                            <li>Calculamos el peso real del bloque ($W$): <br>
+                                $$W = \gamma_s \cdot V = 23.6 \ kN/m^3 \cdot 0.5 \ m^3 = 11.8 \ kN$$
+                            </li>
+                            <li>Calculamos la fuerza de flotación ($F_B$) asumiendo sumersión total: <br>
+                                $$F_B = \gamma_f \cdot V_d = 9.81 \ kN/m^3 \cdot 0.5 \ m^3 = 4.905 \ kN$$
+                            </li>
+                            <li>La tensión en el cable (Peso aparente, $T$) se obtiene de la sumatoria de fuerzas verticales ($\sum F_y = 0$): <br>
+                                $$T + F_B - W = 0 \implies T = W - F_B = 11.8 - 4.905 = 6.895 \ kN$$
+                            </li>
+                        </ol>
+                        <div class="bg-green-100 p-3 mt-4 rounded">
+                            <p class="text-lg text-black"><strong>Análisis:</strong> Dado que el peso específico del concreto es considerablemente mayor que el del agua, la fuerza de flotación generada ($4.905 \ kN$) es insuficiente para contrarrestar su peso ($11.8 \ kN$), resultando en que el bloque se hunde y ejerce una tensión remanente de $6.895 \ kN$ sobre el cable que lo sostiene.</p>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- SECCIÓN 2: ESTABILIDAD -->
+            <section id="sec-2" class="section-content">
+                <div class="max-w-4xl mx-auto space-y-6">
+                    <h2 class="text-3xl font-bold text-primary border-b-2 border-primary pb-2">2. Estabilidad de cuerpos flotantes</h2>
+                    
+                    <p class="text-lg text-black">
+                        La estabilidad se refiere a la capacidad que tiene un cuerpo de regresar a su posición original después de inclinarse con respecto a un eje horizontal. Para que un barco o barcaza no vuelque en el mar, debe diseñarse considerando tres puntos vitales:
+                    </p>
+                    <ul class="list-disc list-inside text-lg text-black space-y-2 mt-2">
+                        <li><strong>Centro de Gravedad ($cg$):</strong> El punto donde se concentra el peso total del cuerpo.</li>
+                        <li><strong>Centro de Flotación ($cb$):</strong> El centroide del volumen desplazado de fluido. La fuerza de flotación actúa hacia arriba a través de este punto.</li>
+                        <li><strong>Metacentro ($mc$):</strong> Punto de intersección de la línea de acción de la fuerza de flotación antes y después de una pequeña inclinación.</li>
+                    </ul>
+
+                    <h3 class="text-2xl font-bold text-primary mt-8">Condición de Estabilidad</h3>
+                    <p class="text-lg text-black">
+                        Un cuerpo flotante es estable si su Metacentro ($mc$) se encuentra por encima de su Centro de Gravedad ($cg$). La distancia entre ellos se llama <strong>Altura Metacéntrica ($GM$)</strong>.
+                    </p>
+                    <div class="bg-gray-50 p-4 rounded-lg text-center overflow-x-auto space-y-4">
+                        $$GM = y_{mc} - y_{cg}$$
+                        <p class="text-left text-lg text-black">Donde la posición del metacentro se halla sumando la distancia $MB$ al centro de flotación $cb$ ($y_{cb}$):</p>
+                        $$y_{mc} = y_{cb} + MB \quad \text{con} \quad MB = \frac{I}{V_d}$$
+                    </div>
+                    <p class="text-lg text-black mt-2">
+                        Aquí, $I$ es el momento de inercia del área de la sección transversal a la altura de la línea de flotación. Si $GM > 0$, el cuerpo es estable. Si $GM < 0$, es inestable y volcará.
+                    </p>
+
+                    <!-- Simulador 2 -->
+                    <div class="bg-secondary p-6 rounded-lg shadow-md border border-primary mt-8">
+                        <h3 class="text-2xl font-bold text-primary mb-4"><i class="fas fa-balance-scale"></i> Simulador de Estabilidad (Barcaza)</h3>
+                        <p class="text-md mb-4 text-black">Modifica los parámetros de una barcaza rectangular para evaluar si su diseño es estable en el fluido.</p>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div class="space-y-4">
+                                <div class="input-group">
+                                    <label>Peso total de la barcaza, $W$ (kN):</label>
+                                    <input type="number" id="sim2-w" value="1500" step="50" oninput="updateSim2()">
+                                </div>
+                                <div class="grid grid-cols-3 gap-2">
+                                    <div class="input-group">
+                                        <label>Ancho, $B$ (m):</label>
+                                        <input type="number" id="sim2-b" value="6.0" step="0.5" oninput="updateSim2()">
+                                    </div>
+                                    <div class="input-group">
+                                        <label>Largo, $L$ (m):</label>
+                                        <input type="number" id="sim2-l" value="12.0" step="0.5" oninput="updateSim2()">
+                                    </div>
+                                    <div class="input-group">
+                                        <label>Alto, $H$ (m):</label>
+                                        <input type="number" id="sim2-h" value="4.0" step="0.5" oninput="updateSim2()">
+                                    </div>
+                                </div>
+                                <div class="input-group">
+                                    <label>Peso esp. fluido, $\gamma_f$ ($kN/m^3$):</label>
+                                    <input type="number" id="sim2-gammaF" value="10.05" step="0.1" oninput="updateSim2()">
+                                </div>
+                                
+                                <div class="mt-4 p-4 bg-white border border-gray-300 rounded space-y-1">
+                                    <p class="text-black">Calado, $T$: <span id="sim2-draft" class="font-bold"></span> m</p>
+                                    <p class="text-black">Centro de Gravedad, $y_{cg}$: <span id="sim2-cg" class="font-bold"></span> m</p>
+                                    <p class="text-black">Metacentro, $y_{mc}$: <span id="sim2-mc" class="font-bold"></span> m</p>
+                                    <p class="font-bold text-black mt-2 border-t pt-2">Altura Metacéntrica, $GM$: <span id="sim2-gm" class="font-bold text-xl"></span> m</p>
+                                    <p class="font-bold text-black text-center text-lg mt-2" id="sim2-status"></p>
+                                </div>
+                            </div>
+                            <div class="flex justify-center items-center flex-col">
+                                <canvas id="canvasSim2" width="300" height="300"></canvas>
+                                <div class="mt-2 text-sm flex gap-4 text-black font-semibold">
+                                    <span class="text-red-600"><i class="fas fa-circle"></i> CG</span>
+                                    <span class="text-blue-600"><i class="fas fa-circle"></i> CB</span>
+                                    <span class="text-green-600"><i class="fas fa-circle"></i> MC</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ejemplo 2 -->
+                    <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-primary mt-8">
+                        <h3 class="text-xl font-bold text-primary mb-2">Ejemplo Práctico 2</h3>
+                        <p class="text-lg text-black font-semibold">Problema:</p>
+                        <p class="text-lg text-black mb-4">Una barcaza rectangular tiene un ancho de $B = 5 \ m$, un largo de $L = 10 \ m$ y una altura de $H = 3 \ m$. Su peso total es de $800 \ kN$. Flota en agua dulce ($\gamma_f = 9.81 \ kN/m^3$). Asumiendo que su centro de gravedad está en su centro geométrico, determine si es estable.</p>
+                        
+                        <p class="text-lg text-black font-semibold">Solución paso a paso:</p>
+                        <ol class="list-decimal list-inside text-lg text-black space-y-2">
+                            <li>Calcular el calado ($T$) basado en el principio de Arquímedes ($W = F_B = \gamma_f \cdot B \cdot L \cdot T$): <br>
+                                $$T = \frac{W}{\gamma_f \cdot B \cdot L} = \frac{800}{9.81 \cdot 5 \cdot 10} = 1.631 \ m$$
+                            </li>
+                            <li>Ubicación del centro de gravedad ($y_{cg}$) y de flotación ($y_{cb}$): <br>
+                                $$y_{cg} = \frac{H}{2} = \frac{3}{2} = 1.5 \ m$$
+                                $$y_{cb} = \frac{T}{2} = \frac{1.631}{2} = 0.8155 \ m$$
+                            </li>
+                            <li>Calcular la distancia $MB$ usando la inercia del plano de flotación ($I = \frac{L \cdot B^3}{12}$): <br>
+                                $$MB = \frac{I}{V_d} = \frac{(L \cdot B^3) / 12}{L \cdot B \cdot T} = \frac{B^2}{12 \cdot T} = \frac{5^2}{12 \cdot 1.631} = 1.277 \ m$$
+                            </li>
+                            <li>Posición del metacentro ($y_{mc}$) y altura metacéntrica ($GM$): <br>
+                                $$y_{mc} = y_{cb} + MB = 0.8155 + 1.277 = 2.0925 \ m$$
+                                $$GM = y_{mc} - y_{cg} = 2.0925 - 1.5 = +0.5925 \ m$$
+                            </li>
+                        </ol>
+                        <div class="bg-green-100 p-3 mt-4 rounded">
+                            <p class="text-lg text-black"><strong>Análisis:</strong> Al obtener un valor de altura metacéntrica positivo ($GM = +0.5925 \ m > 0$), verificamos que el metacentro está por encima del centro de gravedad; por lo tanto concluimos que la barcaza es inherentemente estable y generará un momento adrizante que la hará regresar a su posición horizontal si las olas le provocan una pequeña inclinación.</p>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- SECCIÓN 3: APLICACIONES INDUSTRIALES -->
+            <section id="sec-3" class="section-content">
+                <div class="max-w-4xl mx-auto space-y-6">
+                    <h2 class="text-3xl font-bold text-primary border-b-2 border-primary pb-2 mb-6">3. Aplicaciones Industriales</h2>
+                    <p class="text-lg text-black mb-6">
+                        Los principios de flotabilidad no se limitan únicamente al diseño de embarcaciones. Tienen una extensa variedad de aplicaciones prácticas y fundamentales en la industria moderna:
+                    </p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- Tarjeta 1 -->
+                        <div class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden flex flex-col">
+                            <img src="https://github.com/Juansanher25/Flotabilidadyestabilidad/blob/main/REDOX_DAF_unit_225_m3-h-1000_GPM.jpg?raw=true" alt="Tratamiento de aguas residuales" class="w-full h-52 object-cover" onerror="this.src='https://via.placeholder.com/400x200?text=Imagen+no+disponible'">
+                            <div class="p-5 flex-1 flex flex-col">
+                                <h3 class="font-bold text-xl text-primary mb-2">Tratamiento de Aguas Residuales</h3>
+                                <p class="text-black text-md">El sistema <strong>DAF</strong> (Flotación por Aire Disuelto) inyecta microburbujas en el agua. Estas burbujas se adhieren a los sólidos suspendidos, disminuyendo su densidad global y haciéndolos flotar hacia la superficie donde son removidos mediante un mecanismo de barrido.</p>
+                            </div>
+                        </div>
+
+                        <!-- Tarjeta 2 -->
+                        <div class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden flex flex-col">
+                            <img src="https://github.com/Juansanher25/Flotabilidadyestabilidad/blob/main/production-copper-two-flotation-machines-at-the-arthur-plant-of-the-utah-copper-1024.webp?raw=true" alt="Procesos metalúrgicos" class="w-full h-52 object-cover" onerror="this.src='https://via.placeholder.com/400x200?text=Imagen+no+disponible'">
+                            <div class="p-5 flex-1 flex flex-col">
+                                <h3 class="font-bold text-xl text-primary mb-2">Procesos Metalúrgicos</h3>
+                                <p class="text-black text-md">En la minería, la <strong>flotación por espuma</strong> permite separar los minerales valiosos de la roca estéril (ganga). Usando reactivos químicos, las partículas de mineral se vuelven hidrofóbicas, adhiriéndose a burbujas de aire e impulsándose a la superficie para su recolección.</p>
+                            </div>
+                        </div>
+
+                        <!-- Tarjeta 3 -->
+                        <div class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden flex flex-col">
+                            <img src="https://github.com/Juansanher25/Flotabilidadyestabilidad/blob/main/images.jpg?raw=true" alt="Instrumentación y Navegación" class="w-full h-52 object-cover" onerror="this.src='https://via.placeholder.com/400x200?text=Imagen+no+disponible'">
+                            <div class="p-5 flex-1 flex flex-col">
+                                <h3 class="font-bold text-xl text-primary mb-2">Instrumentación y Navegación</h3>
+                                <p class="text-black text-md">Se emplean <strong>boyas marítimas</strong> balizadas para delimitar canales seguros y hacer mediciones oceánicas. En la industria, los <strong>sensores de nivel tipo flotador</strong> controlan el llenado de tanques gigantes, activando interruptores según el cuerpo flota a una altura crítica.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECCIÓN 4: RESUMEN, EVALUACIÓN Y VIDEOS -->
+            <section id="sec-4" class="section-content">
+                <div class="max-w-4xl mx-auto space-y-8">
+                    
+                    <div>
+                        <h2 class="text-3xl font-bold text-primary border-b-2 border-primary pb-2 mb-4">Resumen de Puntos Clave</h2>
+                        <ul class="list-disc list-inside text-lg text-black space-y-2">
+                            <li>La <strong>fuerza de flotación</strong> es igual al peso del fluido desplazado por el objeto sumergido.</li>
+                            <li>Si el peso específico del cuerpo es menor al del fluido ($\gamma_s < \gamma_f$), el objeto flota parcialmente.</li>
+                            <li>La estabilidad de un cuerpo flotante depende de la posición relativa entre el <strong>Centro de Gravedad ($cg$)</strong> y el <strong>Metacentro ($mc$)</strong>.</li>
+                            <li>Para garantizar la estabilidad ($GM > 0$), los diseñadores ensanchan las embarcaciones (aumentan $B$ incrementando la Inercia) o bajan el centro de gravedad añadiendo lastre.</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-secondary p-6 rounded-lg border border-primary">
+                        <h2 class="text-2xl font-bold text-primary mb-4"><i class="fas fa-pencil-alt"></i> Ejercicios de Autoevaluación</h2>
+                        <p class="text-lg text-black mb-4">Reflexiona y resuelve de forma autónoma. Si necesitas ayuda con el planteamiento, repasa las secciones anteriores y los videos de apoyo.</p>
+                        <ol class="list-decimal list-inside text-lg text-black space-y-4">
+                            <li><strong>Análisis:</strong> Si añades carga en la cubierta superior de un buque mercantil, ¿qué sucede con la altura metacéntrica ($GM$)? ¿Mejora o empeora la estabilidad?</li>
+                            <li><strong>Cálculo:</strong> Un cubo de madera de 0.5 m de lado y $\gamma_s = 6.0 \ kN/m^3$ flota en agua de mar ($\gamma_f = 10.05 \ kN/m^3$). Calcula el calado (profundidad sumergida).</li>
+                            <li><strong>Diseño:</strong> Se requiere diseñar una boya cilíndrica de tal forma que el 80% de su volumen quede sumergido. ¿Cuál debe ser su gravedad específica en relación al fluido en el que flotará?</li>
+                        </ol>
+                    </div>
+
+                    <!-- Material Audiovisual de Apoyo (Integración de Videos) -->
+                    <div class="bg-white p-6 rounded-lg shadow-md border-t-4 border-primary mt-8">
+                        <h2 class="text-2xl font-bold text-primary mb-2"><i class="fab fa-youtube text-red-600"></i> Material Audiovisual: Ejemplos Guiados</h2>
+                        <p class="text-lg text-black mb-6">A continuación, te presento tres videos donde resolvemos paso a paso ejercicios clave sobre estos temas. Haz clic en los botones para abrir los ejemplos en una nueva pestaña y consolidar lo aprendido.</p>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            
+                            <!-- Video 1 -->
+                            <div class="space-y-4 bg-gray-50 p-5 rounded-lg border border-gray-200 flex flex-col justify-between">
+                                <div>
+                                    <h3 class="font-bold text-primary text-xl mb-2">Ejemplo 1: Nivel de un flotador</h3>
+                                    <p class="text-md text-gray-700">Resolución detallada: Cálculo del peso específico requerido para que un cubo flote a una profundidad determinada en aceite.</p>
+                                </div>
+                                <a href="https://youtu.be/-tm31B8ChI0?si=Wur8yo2llKdtI7YS" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-lg transition-colors duration-300 w-full shadow-md">
+                                    <i class="fab fa-youtube text-2xl"></i> Ver en YouTube
+                                </a>
+                            </div>
+
+                            <!-- Video 2 -->
+                            <div class="space-y-4 bg-gray-50 p-5 rounded-lg border border-gray-200 flex flex-col justify-between">
+                                <div>
+                                    <h3 class="font-bold text-primary text-xl mb-2">Ejemplo 2: Bloque suspendido en fluido</h3>
+                                    <p class="text-md text-gray-700">Análisis de un sistema en equilibrio: Cómo calcular el volumen de un bloque suspendido por una cuerda en una solución.</p>
+                                </div>
+                                <a href="https://youtu.be/SSYMGb1OBBU?si=kqgHQGkOQy6vFKsm" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-lg transition-colors duration-300 w-full shadow-md">
+                                    <i class="fab fa-youtube text-2xl"></i> Ver en YouTube
+                                </a>
+                            </div>
+
+                            <!-- Video 3 -->
+                            <div class="space-y-4 bg-gray-50 p-5 rounded-lg border border-gray-200 md:col-span-2 md:w-1/2 md:mx-auto flex flex-col justify-between">
+                                <div>
+                                    <h3 class="font-bold text-primary text-xl mb-2 text-center">Ejemplo 3: Ejercicio complementario</h3>
+                                    <p class="text-md text-gray-700 text-center">Se calcula la densidad de un material cuando se conoce su peso en el aire y su peso en el agua.</p>
+                                </div>
+                                <a href="https://youtu.be/Wc-e0Zv0oPE?si=2HoJq2SxKYwI1Yf0" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-lg transition-colors duration-300 w-full shadow-md">
+                                    <i class="fab fa-youtube text-2xl"></i> Ver en YouTube
+                                </a>
+                            </div>
+                            
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- SECCIÓN 5: BIBLIOGRAFÍA -->
+            <section id="sec-5" class="section-content">
+                <div class="max-w-4xl mx-auto space-y-8">
+                    <div class="bg-secondary p-8 rounded-lg shadow-sm border border-primary">
+                        <h2 class="text-3xl font-bold text-primary border-b-2 border-primary pb-2 mb-6"><i class="fas fa-book-open"></i> Bibliografía de Referencia</h2>
+                        <p class="text-lg text-black mb-4">Para profundizar en los conceptos, ecuaciones y acceder a una mayor variedad de ejercicios propuestos, te recomiendo consultar las siguientes fuentes académicas:</p>
+                        <ul class="text-lg text-black space-y-6">
+                            <li class="pl-4 border-l-4 border-primary">
+                                <strong>(1)</strong> Mott, R. L. (2006). <em>Mecánica de Fluidos 6/e</em>. Pearson educación. (Especialmente el Capítulo 5: Flotabilidad y Estabilidad).
+                            </li>
+                            <li class="pl-4 border-l-4 border-primary">
+                                <strong>(2)</strong> Sandoval, J. (2018). <em>Mecánica de Fluidos</em>. Publicaciones Fundación Universidad de América. Bogotá, Colombia. (Capítulo 7).
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+
+        <!-- Navegación Inferior (Flechas) -->
+        <footer class="bg-gray-100 border-t border-gray-300 p-4 absolute bottom-0 w-full flex justify-between z-10">
+            <button id="btn-prev" onclick="prevSection()" class="bg-primary text-white px-6 py-2 rounded font-bold hover:bg-green-800 focus:outline-none flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                <i class="fas fa-arrow-left"></i> Anterior
+            </button>
+            <div id="page-indicator" class="font-bold text-primary self-center">1 / 6</div>
+            <button id="btn-next" onclick="nextSection()" class="bg-primary text-white px-6 py-2 rounded font-bold hover:bg-green-800 focus:outline-none flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                Siguiente <i class="fas fa-arrow-right"></i>
+            </button>
+        </footer>
+
+    </main>
+
+    <!-- Scripts para Interactividad -->
+    <script>
+        // --- NAVEGACIÓN ENTRE SECCIONES ---
+        let currentSection = 0;
+        const totalSections = 6;
+
+        function updateNavigation() {
+            // Ocultar todas las secciones
+            document.querySelectorAll('.section-content').forEach(el => el.classList.remove('active'));
+            // Mostrar la sección actual
+            document.getElementById('sec-' + currentSection).classList.add('active');
+            
+            // Actualizar botones
+            document.getElementById('btn-prev').disabled = currentSection === 0;
+            document.getElementById('btn-next').disabled = currentSection === totalSections - 1;
+            document.getElementById('page-indicator').innerText = (currentSection + 1) + " / " + totalSections;
+            
+            // Scrollear hacia arriba
+            document.getElementById('content-area').scrollTop = 0;
+
+            // Refrescar MathJax por si algo cambió en la vista
+            if(window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        }
+
+        function nextSection() {
+            if (currentSection < totalSections - 1) {
+                currentSection++;
+                updateNavigation();
+            }
+        }
+
+        function prevSection() {
+            if (currentSection > 0) {
+                currentSection--;
+                updateNavigation();
+            }
+        }
+
+        function goToSection(index) {
+            currentSection = index;
+            updateNavigation();
+            // Si está en móvil, cerrar el sidebar al seleccionar
+            if(window.innerWidth < 768) {
+                toggleSidebar();
+            }
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar.classList.contains('-translate-x-full')) {
+                sidebar.classList.remove('-translate-x-full');
+            } else {
+                sidebar.classList.add('-translate-x-full');
+            }
+        }
+
+        // --- SIMULADOR 1: FLOTABILIDAD ---
+        function updateSim1() {
+            const gammaF = parseFloat(document.getElementById('sim1-gammaF').value);
+            const gammaS = parseFloat(document.getElementById('sim1-gammaS').value);
+            const H = parseFloat(document.getElementById('sim1-h').value);
+            
+            if(isNaN(gammaF) || isNaN(gammaS) || isNaN(H) || gammaF <= 0) return;
+
+            let draft = H * (gammaS / gammaF);
+            let status = "";
+            let statusColor = "";
+
+            if (gammaS > gammaF) {
+                draft = H; // Se hunde por completo
+                status = "Se Hunde";
+                statusColor = "#dc2626"; // red
+            } else if (gammaS === gammaF) {
+                draft = H; // Neutro
+                status = "Flotabilidad Neutra";
+                statusColor = "#eab308"; // yellow
+            } else {
+                status = "Flota";
+                statusColor = "#16a34a"; // green
+            }
+
+            document.getElementById('sim1-draft').innerText = draft.toFixed(3);
+            const statusEl = document.getElementById('sim1-status');
+            statusEl.innerText = status;
+            statusEl.style.color = statusColor;
+
+            drawSim1(H, draft);
+        }
+
+        function drawSim1(totalH, draft) {
+            const canvas = document.getElementById('canvasSim1');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Escala para dibujo (dibujamos un tanque estándar)
+            const tankWidth = 200;
+            const tankHeight = 250;
+            const startX = 50;
+            const startY = 20;
+            const waterLevelY = 100; // Constante visual del nivel del agua
+
+            // Dibujar fluido
+            ctx.fillStyle = "rgba(59, 130, 246, 0.4)"; // Agua translúcida
+            ctx.fillRect(startX, waterLevelY, tankWidth, tankHeight - waterLevelY + startY);
+            
+            // Dibujar línea de fluido
+            ctx.beginPath();
+            ctx.moveTo(startX, waterLevelY);
+            ctx.lineTo(startX + tankWidth, waterLevelY);
+            ctx.strokeStyle = "blue";
+            ctx.stroke();
+
+            // Calcular posición visual del bloque
+            const blockVisualHeight = 100; // tamaño base
+            const blockVisualWidth = 80;
+            const pxPerMeter = blockVisualHeight / totalH;
+            const draftVisual = draft * pxPerMeter;
+
+            let blockY;
+            if (draft >= totalH) { // Se hunde
+                // Si la densidad es mucho mayor, lo ponemos al fondo. Si es neutra, en medio.
+                const gammaF = parseFloat(document.getElementById('sim1-gammaF').value);
+                const gammaS = parseFloat(document.getElementById('sim1-gammaS').value);
+                if(gammaS > gammaF) {
+                    blockY = startY + tankHeight - blockVisualHeight; // Fondo
+                } else {
+                    blockY = waterLevelY + 20; // Neutro, suspendido bajo el agua
+                }
+            } else { // Flota
+                // Y de modo que la parte sumergida quede debajo de la línea de agua
+                blockY = waterLevelY - (blockVisualHeight - draftVisual);
+            }
+
+            // Dibujar bloque
+            ctx.fillStyle = "#a8a29e"; // Color concreto/piedra/madera
+            ctx.fillRect(startX + (tankWidth/2) - (blockVisualWidth/2), blockY, blockVisualWidth, blockVisualHeight);
+            ctx.strokeStyle = "#444";
+            ctx.lineWidth = 2;
+            ctx.strokeRect(startX + (tankWidth/2) - (blockVisualWidth/2), blockY, blockVisualWidth, blockVisualHeight);
+
+            // Contenedor (tanque)
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+            ctx.lineTo(startX, startY + tankHeight);
+            ctx.lineTo(startX + tankWidth, startY + tankHeight);
+            ctx.lineTo(startX + tankWidth, startY);
+            ctx.strokeStyle = "#000";
+            ctx.lineWidth = 3;
+            ctx.stroke();
+        }
+
+        // --- SIMULADOR 2: ESTABILIDAD ---
+        function updateSim2() {
+            const W = parseFloat(document.getElementById('sim2-w').value);
+            const B = parseFloat(document.getElementById('sim2-b').value);
+            const H = parseFloat(document.getElementById('sim2-h').value);
+            const L = parseFloat(document.getElementById('sim2-l').value);
+            const gammaF = parseFloat(document.getElementById('sim2-gammaF').value);
+
+            if(isNaN(W) || isNaN(B) || isNaN(H) || isNaN(L) || isNaN(gammaF) || gammaF <= 0 || B <= 0 || L <= 0) return;
+
+            // Cálculos físicos
+            const draft = W / (gammaF * B * L);
+            
+            // Validar si se hunde
+            if (draft >= H) {
+                document.getElementById('sim2-status').innerHTML = '<span class="text-red-600">¡SE HUNDE! El peso es demasiado.</span>';
+                document.getElementById('sim2-draft').innerText = "> " + H;
+                document.getElementById('sim2-cg').innerText = "-";
+                document.getElementById('sim2-mc').innerText = "-";
+                document.getElementById('sim2-gm').innerText = "-";
+                drawSim2(B, H, draft, null, null, null);
+                return;
+            }
+
+            const cb = draft / 2;
+            const cg = H / 2; // Asumiendo distribución uniforme
+            
+            const I = (L * Math.pow(B, 3)) / 12;
+            const Vd = B * L * draft;
+            const MB = I / Vd;
+            
+            // O una forma más directa para un rectángulo: MB = B^2 / (12 * draft)
+            
+            const mc = cb + MB;
+            const gm = mc - cg;
+
+            document.getElementById('sim2-draft').innerText = draft.toFixed(3);
+            document.getElementById('sim2-cg').innerText = cg.toFixed(3);
+            document.getElementById('sim2-mc').innerText = mc.toFixed(3);
+            
+            const gmEl = document.getElementById('sim2-gm');
+            gmEl.innerText = (gm > 0 ? "+" : "") + gm.toFixed(3);
+            
+            const statusEl = document.getElementById('sim2-status');
+            if(gm > 0) {
+                gmEl.className = "font-bold text-xl text-green-600";
+                statusEl.innerHTML = '<span class="text-green-600">ESTABLE (No volcará)</span>';
+            } else {
+                gmEl.className = "font-bold text-xl text-red-600";
+                statusEl.innerHTML = '<span class="text-red-600">INESTABLE (Peligro de vuelco)</span>';
+            }
+
+            drawSim2(B, H, draft, cb, cg, mc);
+        }
+
+        function drawSim2(B, H, draft, cb, cg, mc) {
+            const canvas = document.getElementById('canvasSim2');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Escala visual dinámica
+            const margin = 40;
+            const drawAreaW = canvas.width - margin*2;
+            const drawAreaH = canvas.height - margin*2;
+            
+            // Buscar la escala que encaje la barcaza
+            const maxDimension = Math.max(B, H);
+            const scale = (Math.min(drawAreaW, drawAreaH)) / maxDimension;
+
+            const visB = B * scale;
+            const visH = H * scale;
+            const visDraft = draft * scale;
+
+            const startX = canvas.width/2 - visB/2;
+            const baseY = canvas.height - margin; // Fondo de la barcaza
+            
+            // Dibujar línea de fluido (si no se hunde)
+            const waterLevelY = baseY - visDraft;
+            ctx.fillStyle = "rgba(59, 130, 246, 0.4)";
+            ctx.fillRect(0, waterLevelY, canvas.width, canvas.height - waterLevelY);
+            
+            ctx.beginPath();
+            ctx.moveTo(0, waterLevelY);
+            ctx.lineTo(canvas.width, waterLevelY);
+            ctx.strokeStyle = "blue";
+            ctx.setLineDash([5, 5]);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Dibujar Barcaza
+            const shipY = baseY - visH;
+            ctx.fillStyle = "#fb923c"; // Color naranja suave
+            ctx.fillRect(startX, shipY, visB, visH);
+            ctx.strokeStyle = "#000";
+            ctx.lineWidth = 2;
+            ctx.strokeRect(startX, shipY, visB, visH);
+
+            if(cb !== null && cg !== null && mc !== null) {
+                const centerX = canvas.width/2;
+                
+                // Función auxiliar para dibujar puntos
+                const drawPoint = (yValue, color, label) => {
+                    const py = baseY - (yValue * scale);
+                    ctx.beginPath();
+                    ctx.arc(centerX, py, 5, 0, 2 * Math.PI);
+                    ctx.fillStyle = color;
+                    ctx.fill();
+                    ctx.strokeStyle = "#000";
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+                    ctx.fillStyle = "#000";
+                    ctx.font = "12px Arial";
+                    ctx.fillText(label, centerX + 10, py + 4);
+                };
+
+                drawPoint(cg, "red", "CG");
+                drawPoint(cb, "blue", "CB");
+                drawPoint(mc, "green", "MC");
+                
+                // Línea de simetría
+                ctx.beginPath();
+                ctx.moveTo(centerX, baseY - visH - 20);
+                ctx.lineTo(centerX, baseY + 20);
+                ctx.strokeStyle = "rgba(0,0,0,0.3)";
+                ctx.stroke();
+            }
+        }
+
+        // Inicializar
+        window.onload = function() {
+            updateNavigation();
+            updateSim1();
+            updateSim2();
+        };
+    </script>
+</body>
+</html>
